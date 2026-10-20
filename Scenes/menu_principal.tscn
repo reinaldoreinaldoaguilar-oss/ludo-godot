@@ -1,0 +1,182 @@
+[gd_scene format=3 uid="uid://bdjyjdswr6dp3"]
+
+[ext_resource type="Script" uid="uid://dssv1d3t1pd8x" path="res://Scenes/menu_principal.gd" id="1_crked"]
+[ext_resource type="Texture2D" uid="uid://bfyhsjolulo4y" path="res://Arts/Textures_Game/Board/ludo portada.jpg" id="2_y4xp8"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ghjig"]
+bg_color = Color(1, 0.16470589, 0.16470589, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+shadow_color = Color(0.3307404, 6.738305e-07, 6.016344e-08, 0.6)
+shadow_offset = Vector2(0, 6)
+
+[node name="MenuPrincipal" type="Control" unique_id=1615973196]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_crked")
+
+[node name="Fondo" type="TextureRect" parent="." unique_id=2016221186]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_y4xp8")
+expand_mode = 1
+
+[node name="Fondo2" type="TextureRect" parent="." unique_id=1287091272]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_y4xp8")
+expand_mode = 1
+
+[node name="MenuBotones" type="Control" parent="." unique_id=442968340]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BtnJugar" type="Button" parent="MenuBotones" unique_id=424180764]
+layout_mode = 1
+offset_left = 511.0
+offset_top = 229.0
+offset_right = 637.0
+offset_bottom = 283.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 7
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "JUGAR"
+
+[node name="BtnPreguntas" type="Button" parent="MenuBotones" unique_id=609298255]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -696.0
+offset_top = 310.0
+offset_right = -469.0
+offset_bottom = 367.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "GESTIONAR PREGUNTAS"
+
+[node name="BtnSalir" type="Button" parent="MenuBotones" unique_id=1893596545]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -44.0
+offset_top = -255.0
+offset_right = 43.0
+offset_bottom = -211.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "SALIR"
+
+[node name="MenuModos" type="Control" parent="." unique_id=1823175311]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.0
+offset_top = 22.0
+offset_right = -1.0
+offset_bottom = 22.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="BtnLocal" type="Button" parent="MenuModos" unique_id=1150616854]
+layout_mode = 0
+offset_left = 132.0
+offset_top = 300.0
+offset_right = 331.0
+offset_bottom = 345.0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "MULTIJUGADOR LOCAL"
+
+[node name="BtnBots" type="Button" parent="MenuModos" unique_id=655798378]
+layout_mode = 0
+offset_left = 872.0
+offset_top = 303.0
+offset_right = 1073.0
+offset_bottom = 351.0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "JUGAR CONTRA BOTS"
+
+[node name="BtnVolver" type="Button" parent="MenuModos" unique_id=701945370]
+layout_mode = 0
+offset_left = 497.0
+offset_top = 440.0
+offset_right = 658.0
+offset_bottom = 486.0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "VOLVER ATRAS"
+
+[node name="PanelPreguntas" type="Panel" parent="." unique_id=942261681]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 652.0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="PanelPreguntas" unique_id=1114519846]
+layout_mode = 0
+offset_left = 128.0
+offset_top = 105.0
+offset_right = 1033.0
+offset_bottom = 522.0
+
+[node name="BtnCerrarPanel" type="Button" parent="PanelPreguntas" unique_id=358971238]
+layout_mode = 0
+offset_left = 535.0
+offset_top = 541.0
+offset_right = 622.0
+offset_bottom = 583.0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_ghjig")
+text = "VOLVER"
+
+[connection signal="pressed" from="MenuBotones/BtnPreguntas" to="." method="_on_btn_preguntas_pressed"]

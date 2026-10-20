@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://cmnljkkjubyya"]
+
+[ext_resource type="PackedScene" uid="uid://rnbs1qysim1j" path="res://Scenes/board_game_play.tscn" id="1_jjkav"]
+[ext_resource type="PackedScene" uid="uid://bm2imeeg020if" path="res://Scenes/Roots/pieces_root.tscn" id="3_x1548"]
+[ext_resource type="PackedScene" uid="uid://b8ol7tr8s2blx" path="res://Scenes/Roots/Dice_Root.tscn" id="6_bx5hx"]
+[ext_resource type="PackedScene" uid="uid://wmq4blipinx5" path="res://Scenes/way_points_root.tscn" id="7_rw8h0"]
+
+[node name="CoreGamplay" type="Node2D"]
+
+[node name="Board" type="Node2D" parent="."]
+
+[node name="board_GamePlay" parent="Board" node_paths=PackedStringArray("way_points", "piecesManager") groups=["BoardManager"] instance=ExtResource("1_jjkav")]
+way_points = NodePath("../../WayPointsManager")
+piecesManager = NodePath("../../Pieces")
+
+[node name="Pieces" parent="." instance=ExtResource("3_x1548")]
+
+[node name="Dice" type="Node2D" parent="."]
+
+[node name="DiceRoot" parent="Dice" instance=ExtResource("6_bx5hx")]
+position = Vector2(0, 1172)
+IsAutoDiceRoll = false
+
+[node name="WayPointsManager" parent="." instance=ExtResource("7_rw8h0")]
+
+[connection signal="OnDiceRollBegin" from="Dice/DiceRoot" to="Board/board_GamePlay" method="_on_dice_root_on_dice_roll_begin"]
+[connection signal="OnDiceRolled" from="Dice/DiceRoot" to="Board/board_GamePlay" method="_on_dice_root_on_dice_rolled"]

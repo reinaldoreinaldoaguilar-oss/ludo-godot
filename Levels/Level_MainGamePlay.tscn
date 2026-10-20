@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://bs72hdhyevken"]
+
+[ext_resource type="PackedScene" uid="uid://cmnljkkjubyya" path="res://Scenes/Roots/Core_Gamplay_Root.tscn" id="1_hpn5y"]
+[ext_resource type="Texture2D" uid="uid://d2a7wvwftuaql" path="res://Arts/Textures_Game/Background/background.jpg" id="2_ldk7m"]
+[ext_resource type="PackedScene" uid="uid://c5bc4wy5ngmxs" path="res://Scenes/ventana_trivial.tscn" id="3_r38cl"]
+[ext_resource type="Script" uid="uid://bu04kkfx4up3a" path="res://Scenes/BtnSalirMenu.gd" id="4_dkks2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r38cl"]
+bg_color = Color(1, 0.16470589, 0.16470589, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 25
+corner_radius_top_right = 25
+corner_radius_bottom_right = 25
+corner_radius_bottom_left = 25
+shadow_color = Color(0.3307404, 6.738305e-07, 6.016344e-08, 0.6)
+shadow_offset = Vector2(0, 6)
+
+[node name="LevelMainGamePlay" type="Node2D" unique_id=1946922144]
+
+[node name="CoreGamplay" parent="." unique_id=1715284566 instance=ExtResource("1_hpn5y")]
+z_index = 1
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1396655837]
+zoom = Vector2(0.2, 0.2)
+
+[node name="BackGround2DSprite" type="Sprite2D" parent="." unique_id=1875240878]
+position = Vector2(23, -55)
+scale = Vector2(1.46929, 1.46929)
+texture = ExtResource("2_ldk7m")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1416702501]
+
+[node name="VentanaTrivial" parent="CanvasLayer" unique_id=1523222245 instance=ExtResource("3_r38cl")]
+visible = false
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+grow_horizontal = 1
+grow_vertical = 1
+mouse_filter = 2
+
+[node name="BtnSalirMenu" type="Button" parent="CanvasLayer" unique_id=1298613509]
+offset_left = -2716.0
+offset_top = -1974.0
+offset_right = -2380.0
+offset_bottom = -1841.0
+theme_override_colors/font_color = Color(0.875, 0.875, 0.875, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_r38cl")
+text = "SALIR"
+script = ExtResource("4_dkks2")
