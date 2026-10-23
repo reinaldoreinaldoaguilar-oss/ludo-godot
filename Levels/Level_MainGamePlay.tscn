@@ -4,6 +4,17 @@
 [ext_resource type="Texture2D" uid="uid://d2a7wvwftuaql" path="res://Arts/Textures_Game/Background/background.jpg" id="2_ldk7m"]
 [ext_resource type="PackedScene" uid="uid://c5bc4wy5ngmxs" path="res://Scenes/ventana_trivial.tscn" id="3_r38cl"]
 [ext_resource type="PackedScene" path="res://Scenes/hud.tscn" id="4_hud"]
+[ext_resource type="Script" path="res://Scripts/GameFeedback.gd" id="5_fx"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_board"]
+bg_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 90
+shadow_offset = Vector2(0, 40)
 
 [node name="LevelMainGamePlay" type="Node2D" unique_id=1946922144]
 
@@ -11,12 +22,26 @@
 z_index = 1
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1396655837]
-zoom = Vector2(0.2, 0.2)
+zoom = Vector2(0.28, 0.28)
 
 [node name="BackGround2DSprite" type="Sprite2D" parent="." unique_id=1875240878]
 position = Vector2(23, -55)
 scale = Vector2(1.46929, 1.46929)
+modulate = Color(0.38, 0.38, 0.45, 1)
 texture = ExtResource("2_ldk7m")
+
+[node name="BoardShadow" type="Panel" parent="."]
+offset_left = -930.0
+offset_top = -930.0
+offset_right = 930.0
+offset_bottom = 930.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_board")
+
+[node name="GameFeedback" type="Node2D" parent="." node_paths=PackedStringArray("camera")]
+z_index = 5
+script = ExtResource("5_fx")
+camera = NodePath("../Camera2D")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1416702501]
 

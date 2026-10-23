@@ -21,6 +21,7 @@ var bot_delay: float = 0.8
 var currentPlayerColor: GameManager.PlayerColor = GameManager.PlayerColor.Green
 var currentDiceValue: int = -1
 var sixes_in_a_row: int = 0
+var lobby_attempts: int = 0 # Intentos para sacar 6 con todas las fichas en la base.
 var active_colors: Array[int] = []
 var finished_colors: Array[int] = [] # Orden de llegada = ranking.
 var is_game_over: bool = false
@@ -76,6 +77,7 @@ func end_turn(extra_turn: bool) -> void:
 		game_message.emit("¡Turno extra!", currentPlayerColor)
 	else:
 		sixes_in_a_row = 0
+		lobby_attempts = 0
 		currentPlayerColor = LudoRules.next_color(currentPlayerColor, active_colors, finished_colors)
 	begin_turn()
 
@@ -107,6 +109,15 @@ func _on_dice_root_on_dice_rolled(value: int) -> void:
 	var snapshot := get_snapshot()
 	var moves := LudoRules.valid_moves(snapshot["dicts"], currentPlayerColor, value)
 	if moves.is_empty():
+		# Con todas las fichas en la base hay hasta 3 intentos para sacar un 6.
+		var group := piecesManager.GetPieceGroupBasedOnType(currentPlayerColor)
+		var none_on_board := not group.Pieces.any(func(p: Piece): return p.CurrentState == GameManager.PieceStateEnum.InWayPoint)
+		if none_on_board and lobby_attempts < LudoRules.LOBBY_ATTEMPTS - 1:
+			lobby_attempts += 1
+			game_message.emit("Necesitas un 6. Intento %d de %d." % [lobby_attempts + 1, LudoRules.LOBBY_ATTEMPTS], currentPlayerColor)
+			await wait(0.6)
+			begin_turn()
+			return
 		game_message.emit("Sin movimientos posibles.", currentPlayerColor)
 		await wait(0.9)
 		end_turn(value == 6)
@@ -173,11 +184,11 @@ func execute_move(piece: Piece) -> void:
 	var snapshot := get_snapshot()
 	for idx in LudoRules.captures_at(snapshot["dicts"], color, target):
 		var victim: Piece = snapshot["pieces"][idx]
+		piece_captured.emit(color, victim)
 		if victim.CurrentWayPoint:
 			victim.CurrentWayPoint.remove_piece(victim)
-		victim.reset_to_lobby()
+		victim.send_to_lobby()
 		add_stat(color, "capturas", 1)
-		piece_captured.emit(color, victim)
 		game_message.emit("¡%s capturó una ficha %s!" % [GameManager.get_nombre(color), GameManager.COLOR_NAMES[victim.CurrentPlayerColor]], color)
 		extra_turn = true
 

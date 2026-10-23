@@ -19,6 +19,8 @@ const START_OFFSET := {
 ## Casillas seguras (estrellas y salidas) del recorrido compartido.
 const SAFE_CELLS: Array[int] = [0, 8, 13, 21, 26, 34, 39, 47]
 const MAX_SIXES_IN_A_ROW := 3
+## Tiros permitidos para sacar un 6 cuando todas las fichas están en la base.
+const LOBBY_ATTEMPTS := 3
 
 static func can_move(state: int, progress: int, dice: int) -> bool:
 	match state:
