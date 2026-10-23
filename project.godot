@@ -29,10 +29,6 @@ BasePreguntas="*uid://brhm8imedy3i8"
 window/size/mode=3
 window/stretch/mode="canvas_items"
 
-[dotnet]
-
-project/assembly_name="Godot_Project"
-
 [input]
 
 DiceClick={

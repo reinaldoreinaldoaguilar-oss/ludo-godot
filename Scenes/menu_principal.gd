@@ -19,28 +19,6 @@ extends Control
 @onready var lbl_preguntas = $PanelPreguntas/RichTextLabel
 @onready var btn_cerrar_panel = $PanelPreguntas/BtnCerrarPanel
 
-# Base de datos de preguntas (NUEVO)
-var banco_preguntas = [
-	# --- ESTRUCTURAS DINÁMICAS ---
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué es una Pila (Stack)?", "respuesta": "Una estructura LIFO (Last In, First Out). El último elemento en entrar es el primero en salir."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué es una Cola (Queue)?", "respuesta": "Una estructura FIFO (First In, First Out). El primer elemento en entrar es el primero en salir."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué diferencia una lista enlazada de un arreglo estático?", "respuesta": "La lista crece dinámicamente en memoria; el arreglo tiene un tamaño fijo definido desde el principio."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué guarda el 'nodo' de una lista enlazada simple?", "respuesta": "Guarda el valor (dato) y un puntero (referencia) al siguiente nodo."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué es una lista doblemente enlazada?", "respuesta": "Una lista donde cada nodo tiene referencias tanto al nodo siguiente como al nodo anterior."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué es un Árbol Binario?", "respuesta": "Una estructura jerárquica donde cada nodo tiene como máximo dos hijos (izquierdo y derecho)."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué es un Grafo?", "respuesta": "Un conjunto de nodos (vértices) conectados por enlaces (aristas), útil para representar redes."},
-	{"tema": "Estructuras Dinámicas", "pregunta": "¿Qué sucede en un 'Desbordamiento de Pila' (Stack Overflow)?", "respuesta": "Ocurre cuando el programa intenta usar más espacio de memoria en la pila de llamadas del que está disponible."},
-
-	# --- CULTURA GENERAL ---
-	{"tema": "Cultura General", "pregunta": "¿Cuál es el río más largo del mundo?", "respuesta": "El río Amazonas."},
-	{"tema": "Cultura General", "pregunta": "¿Quién pintó la famosa obra de la Mona Lisa?", "respuesta": "Leonardo da Vinci."},
-	{"tema": "Cultura General", "pregunta": "¿Cuál es el planeta más grande de nuestro sistema solar?", "respuesta": "Júpiter."},
-	{"tema": "Cultura General", "pregunta": "¿En qué año llegó el hombre a la Luna por primera vez?", "respuesta": "En el año 1969."},
-	{"tema": "Cultura General", "pregunta": "¿Cuál es el hueso más largo del cuerpo humano?", "respuesta": "El fémur."},
-	{"tema": "Cultura General", "pregunta": "¿Cuántos estados conforman políticamente a Venezuela?", "respuesta": "23 estados y el Distrito Capital."},
-	{"tema": "Cultura General", "pregunta": "¿Cuál es el océano más grande del mundo?", "respuesta": "El Océano Pacífico."},
-	{"tema": "Cultura General", "pregunta": "¿Cuál es el símbolo químico del oro?", "respuesta": "Au."}
-]
 
 func _ready():
 	# Asegurarnos de que el menú principal se vea y los demás estén ocultos al inicio
@@ -50,7 +28,6 @@ func _ready():
 	
 	# Conectar botones principales a sus funciones
 	btn_jugar.pressed.connect(_on_btn_jugar_pressed)
-	btn_preguntas.pressed.connect(_on_btn_preguntas_pressed)
 	btn_salir.pressed.connect(_on_btn_salir_pressed)
 	
 	# Conectar botones de modo a sus funciones
@@ -78,10 +55,12 @@ func _on_btn_preguntas_pressed():
 	# Limpiamos y preparamos el título (NUEVO)
 	lbl_preguntas.text = "--- BANCO DE PREGUNTAS ---\n\n"
 	
-	# Cargamos las preguntas automáticamente en el cuadro de texto (NUEVO)
-	for p in banco_preguntas:
-		lbl_preguntas.text += "[" + p["tema"] + "] " + p["pregunta"] + "\n"
-		lbl_preguntas.text += "R: " + p["respuesta"] + "\n\n"
+	# Mostramos el mismo banco que usa la trivia del juego (Data/preguntas.json)
+	for categoria in BasePreguntas.categorias():
+		lbl_preguntas.text += "[" + BasePreguntas.nombres_categoria[categoria] + "]\n"
+		for p in BasePreguntas.trivia[categoria]:
+			lbl_preguntas.text += "• " + p["pregunta"] + "\n  R: " + p["opciones"][p["correcta"]] + "\n"
+		lbl_preguntas.text += "\n"
 
 func _on_btn_salir_pressed():
 	print("Saliendo del juego...")
@@ -91,12 +70,12 @@ func _on_btn_salir_pressed():
 
 func _on_btn_local_pressed():
 	print("Iniciando partida Local con amigos...")
-	GameManager.modo_contra_bots = false # Apaga los bots
+	GameManager.configurar_partida_rapida(false) # Todos humanos
 	get_tree().change_scene_to_file("res://Levels/Level_MainGamePlay.tscn")
 
 func _on_btn_bots_pressed():
 	print("Iniciando partida contra Bots...")
-	GameManager.modo_contra_bots = true # Enciende los bots
+	GameManager.configurar_partida_rapida(true) # Verde humano, resto bots
 	get_tree().change_scene_to_file("res://Levels/Level_MainGamePlay.tscn")
 
 func _on_btn_volver_pressed():
