@@ -11,9 +11,22 @@ func _ready() -> void:
 		GameManager.configurar_partida_rapida(true)
 		for j in GameManager.jugadores:
 			j["es_bot"] = true
+	var accion: String = args[4] if args.size() > 4 else ""
 	var scene: Node = load(scene_path).instantiate()
 	add_child(scene)
 	await get_tree().create_timer(seconds).timeout
+	match accion:
+		"config": scene.abrir_configuracion()
+		"preguntas": scene.abrir_gestor_preguntas()
+		"reglas": PanelReglas.abrir(scene)
+		"trivia": get_tree().get_first_node_in_group("Trivia").preguntar()
+		"pausa": get_tree().get_first_node_in_group("HUD").toggle_pause()
+		"fin":
+			var board = get_tree().get_first_node_in_group("Tablero")
+			board.stats[0]["capturas"] = 3
+			board.finish_game()
+	if accion != "":
+		await get_tree().create_timer(1.6).timeout
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(out)
 	get_tree().quit()

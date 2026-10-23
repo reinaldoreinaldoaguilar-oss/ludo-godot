@@ -1,6 +1,6 @@
-extends SceneTree
+extends Node
 ## Pruebas automáticas de las reglas. Ejecutar:
-##   godot --headless --script res://tests/test_rules.gd
+##   godot --headless res://tests/test_rules.tscn
 
 const G := GameManager.PlayerColor.Green
 const Y := GameManager.PlayerColor.Yellow
@@ -24,7 +24,7 @@ func check(condition: bool, name: String) -> void:
 func piece(color: int, state: int, progress: int) -> Dictionary:
 	return {"color": color, "state": state, "progress": progress}
 
-func _initialize() -> void:
+func _ready() -> void:
 	print("== Pruebas de LudoRules ==")
 	# Salir de la base
 	check(LudoRules.can_move(LOBBY, 0, 6), "con 6 se sale de la base")
@@ -81,10 +81,19 @@ func _initialize() -> void:
 	check(LudoRules.next_color(G, active, [Y]) == B, "se salta al que ya terminó")
 	check(LudoRules.next_color(G, [G, B], []) == B, "2 jugadores: verde contra azul")
 	# Banco de preguntas
-	var banco = root.get_node("BasePreguntas")
+	var banco = BasePreguntas
 	check(banco.total_preguntas() >= 30, "banco de preguntas cargado (%d)" % banco.total_preguntas())
 	var q: Dictionary = banco.pregunta_aleatoria("cultura")
 	check(q["opciones"].size() == 4 and q["correcta"] in [0, 1, 2, 3], "pregunta con 4 opciones válidas")
 
+	# Preguntas propias (gestor de preguntas)
+	var antes: int = banco.total_preguntas()
+	check(banco.agregar_pregunta("cultura", "¿?", ["a", "b", "c", "d"], 0, 2) != "", "rechaza preguntas demasiado cortas")
+	check(banco.agregar_pregunta("cultura", "Pregunta de prueba automática", ["a", "", "c", "d"], 0, 2) != "", "rechaza opciones vacías")
+	check(banco.agregar_pregunta("cultura", "Pregunta de prueba automática", ["a", "b", "c", "d"], 1, 2) == "", "agrega una pregunta válida")
+	check(banco.total_preguntas() == antes + 1, "la pregunta nueva cuenta en el total")
+	banco.eliminar_pregunta("cultura", "Pregunta de prueba automática")
+	check(banco.total_preguntas() == antes, "se puede eliminar la pregunta propia")
+
 	print("== %d/%d pruebas correctas ==" % [total - failures, total])
-	quit(1 if failures > 0 else 0)
+	get_tree().quit(1 if failures > 0 else 0)

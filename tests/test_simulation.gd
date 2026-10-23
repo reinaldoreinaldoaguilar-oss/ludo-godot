@@ -25,6 +25,8 @@ var level: Node
 
 func _ready() -> void:
 	gm = GameManager
+	gm.registrar_estadisticas = false
+	gm.velocidad_bots = 1
 	rng.seed = 42
 	Engine.time_scale = 60.0
 	next_scenario.call_deferred()

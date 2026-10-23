@@ -17,6 +17,7 @@ var pause_layer: Control
 var end_layer: Control
 
 func _ready() -> void:
+	add_to_group("HUD")
 	theme = UITheme.get_theme()
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -35,14 +36,6 @@ func _ready() -> void:
 	board.game_over.connect(_on_game_over)
 
 # ---------------------------------------------------------------- Construcción
-
-func label(text: String, size: int, color: Color = UITheme.TEXT, weight: int = 700) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.add_theme_font_size_override("font_size", size)
-	l.add_theme_color_override("font_color", color)
-	l.add_theme_font_override("font", UITheme.font(weight))
-	return l
 
 func build_player_cards() -> void:
 	var column := VBoxContainer.new()
@@ -64,9 +57,9 @@ func build_player_cards() -> void:
 		var info := VBoxContainer.new()
 		info.add_theme_constant_override("separation", 2)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		info.add_child(label(j["nombre"], 17, UITheme.TEXT, 800))
+		info.add_child(UIKit.label(j["nombre"], 17, UITheme.TEXT, 800))
 		var kind: String = "Bot · " + DIFF_NAMES[GameManager.dificultad] if j["es_bot"] else "Humano"
-		var status := label(kind, 13, UITheme.TEXT_MUTED, 600)
+		var status := UIKit.label(kind, 13, UITheme.TEXT_MUTED, 600)
 		info.add_child(status)
 		var dots := HBoxContainer.new()
 		dots.add_theme_constant_override("separation", 4)
@@ -76,7 +69,7 @@ func build_player_cards() -> void:
 			dots.add_child(d)
 		info.add_child(dots)
 		row.add_child(info)
-		var points := label("0 pts", 15, Color("ffd32a"), 800)
+		var points := UIKit.label("0 pts", 15, Color("ffd32a"), 800)
 		row.add_child(points)
 		panel.add_child(row)
 		column.add_child(panel)
@@ -95,7 +88,7 @@ func build_top_bar() -> void:
 	banner.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	banner.position.y = 12
 	banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	banner_label = label("", 22, UITheme.TEXT, 900)
+	banner_label = UIKit.label("", 22, UITheme.TEXT, 900)
 	banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner.add_child(banner_label)
 	add_child(banner)
@@ -110,10 +103,10 @@ func build_dice_area() -> void:
 	area.offset_bottom = 300
 	area.alignment = BoxContainer.ALIGNMENT_BEGIN
 	area.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	dice_value_label = label("", 46, Color.WHITE, 900)
+	dice_value_label = UIKit.label("", 46, Color.WHITE, 900)
 	dice_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	area.add_child(dice_value_label)
-	hint_label = label("", 18, UITheme.TEXT, 700)
+	hint_label = UIKit.label("", 18, UITheme.TEXT, 700)
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	area.add_child(hint_label)
@@ -124,47 +117,15 @@ func build_dice_area() -> void:
 	add_child(area)
 
 func build_pause_menu() -> void:
-	pause_layer = overlay()
-	var panel := centered_panel(pause_layer, 360)
-	var box: VBoxContainer = panel.get_child(0)
-	box.add_child(title("Pausa"))
-	box.add_child(button("Continuar", toggle_pause))
-	box.add_child(button("Reiniciar partida", func(): change_scene(LEVEL_SCENE)))
-	box.add_child(button("Salir al menú", func(): change_scene(MENU_SCENE)))
+	pause_layer = UIKit.overlay(self, 0.55)
+	var box := UIKit.centered_box(pause_layer, 360)
+	box.add_child(UIKit.title("Pausa"))
+	box.add_child(UIKit.button("Continuar", toggle_pause))
+	box.add_child(UIKit.button("Reglas", func(): PanelReglas.abrir(self)))
+	box.add_child(UIKit.button("Ajustes", func(): PanelAjustes.abrir(self)))
+	box.add_child(UIKit.button("Reiniciar partida", func(): change_scene(LEVEL_SCENE)))
+	box.add_child(UIKit.button("Salir al menú", func(): change_scene(MENU_SCENE)))
 	pause_layer.hide()
-
-func overlay() -> Control:
-	var layer := ColorRect.new()
-	layer.color = Color(0, 0, 0, 0.55)
-	layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(layer)
-	return layer
-
-func centered_panel(parent: Control, width: float) -> PanelContainer:
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	parent.add_child(center)
-	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(width, 0)
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 12)
-	panel.add_child(box)
-	center.add_child(panel)
-	return panel
-
-func title(text: String) -> Label:
-	var l := label(text, 30, UITheme.TEXT, 900)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	return l
-
-func button(text: String, action: Callable) -> Button:
-	var b := Button.new()
-	b.text = text
-	b.custom_minimum_size = Vector2(0, 48)
-	b.pressed.connect(func():
-		AudioManager.play("click")
-		action.call())
-	return b
 
 # ---------------------------------------------------------------- Actualización
 
@@ -218,7 +179,7 @@ func show_toast(text: String, color: int) -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var c: Color = GameManager.COLOR_VALUES.get(color, UITheme.ACCENT)
 	panel.add_theme_stylebox_override("panel", UITheme.box(Color(0.08, 0.09, 0.14, 0.92), 14, c, 2, 10))
-	var l := label(text, 17, UITheme.TEXT, 700)
+	var l := UIKit.label(text, 17, UITheme.TEXT, 700)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	panel.add_child(l)
 	toast_box.add_child(panel)
@@ -235,6 +196,9 @@ func show_toast(text: String, color: int) -> void:
 func toggle_pause() -> void:
 	if end_layer and end_layer.visible:
 		return
+	var trivia = get_tree().get_first_node_in_group("Trivia")
+	if trivia and trivia.visible:
+		return # No se pausa en medio de una pregunta.
 	var paused := not get_tree().paused
 	get_tree().paused = paused
 	pause_layer.visible = paused
@@ -254,35 +218,36 @@ func change_scene(path: String) -> void:
 func _on_game_over(ranking: Array) -> void:
 	hint_label.text = ""
 	await get_tree().create_timer(0.8, false).timeout
-	end_layer = overlay()
-	var panel := centered_panel(end_layer, 620)
-	var box: VBoxContainer = panel.get_child(0)
+	end_layer = UIKit.overlay(self, 0.55)
+	var box := UIKit.centered_box(end_layer, 620)
+	var panel: PanelContainer = box.get_parent()
+	panel.add_theme_stylebox_override("panel", UITheme.box(Color(0.09, 0.1, 0.16, 0.97), 24, Color("ffd32a"), 2, 24))
 	var winner: int = ranking[0]
-	box.add_child(title("¡Ganó %s!" % GameManager.get_nombre(winner)))
+	box.add_child(UIKit.title("¡Ganó %s!" % GameManager.get_nombre(winner)))
 	var grid := GridContainer.new()
 	grid.columns = 6
 	grid.add_theme_constant_override("h_separation", 18)
 	grid.add_theme_constant_override("v_separation", 8)
 	for h in ["#", "Jugador", "Capturas", "Seises", "Trivia", "Puntos"]:
-		grid.add_child(label(h, 14, UITheme.TEXT_MUTED, 800))
+		grid.add_child(UIKit.label(h, 14, UITheme.TEXT_MUTED, 800))
 	var medals := ["1°", "2°", "3°", "4°"]
 	for i in ranking.size():
 		var color: int = ranking[i]
 		var s: Dictionary = board.stats[color]
-		grid.add_child(label(medals[i], 18))
-		grid.add_child(label(GameManager.get_nombre(color), 17, GameManager.COLOR_VALUES[color].lightened(0.2), 800))
-		grid.add_child(label(str(s["capturas"]), 17))
-		grid.add_child(label(str(s["seises"]), 17))
-		grid.add_child(label("%d/%d" % [s["trivia_ok"], s["trivia_total"]], 17))
-		grid.add_child(label(str(s["puntos"]), 17, Color("ffd32a")))
+		grid.add_child(UIKit.label(medals[i], 18))
+		grid.add_child(UIKit.label(GameManager.get_nombre(color), 17, GameManager.COLOR_VALUES[color].lightened(0.2), 800))
+		grid.add_child(UIKit.label(str(s["capturas"]), 17))
+		grid.add_child(UIKit.label(str(s["seises"]), 17))
+		grid.add_child(UIKit.label("%d/%d" % [s["trivia_ok"], s["trivia_total"]], 17))
+		grid.add_child(UIKit.label(str(s["puntos"]), 17, Color("ffd32a")))
 	var center := CenterContainer.new()
 	center.add_child(grid)
 	box.add_child(center)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
-	var again := button("Jugar otra vez", func(): change_scene(LEVEL_SCENE))
+	var again := UIKit.button("Revancha", func(): change_scene(LEVEL_SCENE))
 	again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var menu := button("Menú principal", func(): change_scene(MENU_SCENE))
+	var menu := UIKit.button("Menú principal", func(): change_scene(MENU_SCENE))
 	menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(again)
 	row.add_child(menu)

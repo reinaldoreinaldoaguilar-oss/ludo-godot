@@ -90,6 +90,16 @@ static func get_theme() -> Theme:
 	t.set_stylebox("normal", "LineEdit", box(Color(1, 1, 1, 0.1), 10, Color(1, 1, 1, 0.15), 1, 10))
 	t.set_stylebox("focus", "LineEdit", box(Color(1, 1, 1, 0.14), 10, ACCENT, 2, 10))
 	t.set_color("font_color", "LineEdit", TEXT)
+	t.set_font_size("font_size", "LineEdit", 17)
+	t.set_font_size("font_size", "OptionButton", 17)
+	t.set_font_size("font_size", "SpinBox", 17)
+	var empty := StyleBoxEmpty.new()
+	for state in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
+		t.set_stylebox(state, "CheckButton", empty)
+	t.set_color("font_color", "CheckButton", TEXT)
+	t.set_color("font_hover_color", "CheckButton", Color.WHITE)
+	t.set_color("font_pressed_color", "CheckButton", TEXT)
+	t.set_color("font_hover_pressed_color", "CheckButton", Color.WHITE)
 	_theme = t
 	return t
 

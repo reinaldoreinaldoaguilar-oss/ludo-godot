@@ -42,6 +42,7 @@ signal stats_changed(stats: Dictionary)
 func _ready() -> void:
 	add_to_group("Tablero")
 	rng.randomize()
+	bot_delay = GameManager.bot_delay()
 	dice = get_tree().get_first_node_in_group("Dado")
 	GameManager.OnPlayerSelectPiece.connect(_on_player_select_piece)
 	for j in GameManager.jugadores:
@@ -234,6 +235,7 @@ func finish_game() -> void:
 	var ranking: Array = finished_colors.duplicate()
 	ranking.append_array(remaining)
 	GameManager.UpdateGameCurrentState(GameManager.GameStateEnum.GameOver)
+	GameManager.registrar_partida(ranking, stats)
 	game_over.emit(ranking)
 
 func progress_score(color: int) -> int:

@@ -1,47 +1,84 @@
-# Godot Ludo
+# Ludo Trivia — Godot 4
 
-Welcome, game developers! You are in the right place to start learning the Godot Engine by working on a real-world game—Ludo.
+Ludo clásico para 2 a 4 jugadores (humanos o bots) con **trivia integrada**:
+al sacar un 6 o caer en una estrella hay que responder una pregunta de fútbol,
+estructuras de datos o cultura general.
 
-This repository contains a Godot Engine project built with GDScript. I started this open-source project to learn Godot and GDScript while also providing a practical project for beginners who want to explore the engine through hands-on experience.
+Hecho con **Godot 4.7** y **GDScript**.
 
-If you are eager to contribute in any way—whether through art, code, sound, VFX, or animation—your help is most welcome! If you would like to connect with me before submitting a pull request, feel free to reach out on LinkedIn (you can find the link in my GitHub profile).
+## Cómo jugar
 
-## Screenshots
-Here are the initial screenshots of the game. This is the early version, and the visuals will be updated once we have contributors for art.
-![Godot Ludo 1](https://github.com/user-attachments/assets/039e3efb-e5bd-4a4e-a31a-ed12607bd8ba)
+1. Abre el proyecto en Godot 4.7 y pulsa *Ejecutar* (F5).
+2. **Jugar** → elige número de jugadores, nombres, quién es bot, dificultad,
+   modo de victoria y si la trivia está activada.
+3. Toca el dado (o pulsa **Espacio**) y luego la ficha resaltada que quieras mover.
+4. **Esc** abre la pausa (reglas, ajustes, reiniciar, salir).
 
-## Contribution Guidelines
-At present, there are no strict contribution rules. As the project progresses, I will define guidelines accordingly. However, for those interested in contributing:
+Las reglas completas están en el menú **Reglas** dentro del juego.
 
-1. The master branch contains the latest merged code and serves as the complete game source.
-2. All development work should be done in feature/development branches.
-3. Pull requests should be submitted to the feature/development branch, following this structure: feature/*.
+## Funciones
 
-## Project Structure
-Please try to follow the project structure I have established. However, you may adjust it as needed. If you are contributing as a game programmer, you must adhere to this structure.
+- Reglas completas: salida con 6 (3 intentos si no hay fichas en juego), turno extra
+  con 6, captura o llegada a meta, tres seises seguidos pierden el turno, casillas
+  seguras y llegada exacta a la meta.
+- Bots con 3 niveles: **Fácil** (al azar), **Normal** (prioriza capturar y avanzar),
+  **Difícil** (además evita casillas amenazadas y huye del peligro).
+- Trivia con temporizador de 15 s, opciones barajadas y puntos por acierto.
+- **Gestor de preguntas**: ver el banco y agregar/eliminar preguntas propias.
+- Partida rápida (gana el primero) o completa (ranking de todos).
+- Animaciones (saltos, capturas, dado), partículas, confeti, sonido y música.
+- Pantalla final con estadísticas por jugador e historial de partidas guardado.
+- Ajustes guardados: volumen de efectos y música, velocidad de bots, pantalla completa.
 
-res://  
-├── Arts  
-│   ├── Textures_Game  
-│   │   ├── Background  
-│   │   ├── Board  
-│   │   ├── Dices  
-│   │   ├── Pieces  
-├── Levels  
-├── Scenes  
-│   ├── Roots  
-│   ├── (Other sub-scenes derived from Scenes/Roots)  
-├── Scripts  
+## Estructura del proyecto
 
-## Folder Structure Overview
+```
+res://
+├── Arts/            Texturas, animaciones, fuente (Nunito) y audio
+├── Data/            preguntas.json (banco de preguntas de la trivia)
+├── Levels/          Level_MainGamePlay.tscn (partida)
+├── Scenes/          Menú, HUD, trivia, fichas y escenas raíz (Roots)
+├── Scripts/         Lógica del juego
+└── tests/           Pruebas automáticas y herramientas
+```
 
-* Arts: Contains all art-related assets, including textures, backgrounds, boards, dice, and pieces.
-* Levels: Stores all main levels of the game.
-* Scenes/Roots: Contains the root scenes.
-* Scenes/: Includes all sub-scenes derived from Scenes/Roots.
-* Scripts: Contains all game scripts.
+### Arquitectura (Scripts/)
 
-## ⚠️ Alert
-I will never request money or cryptocurrency. If anyone claims to be me and asks for such payments, they are attempting to scam you. Please be cautious and do not fall for such tricks.
+| Script | Responsabilidad |
+|---|---|
+| `GameManager.gd` (autoload) | Estados, configuración de la partida, ajustes e historial |
+| `LudoRules.gd` | **Reglas puras** (movimientos, capturas, turnos, IA). Sin nodos: se prueban solas |
+| `BoardManager.gd` | Máquina de estados del turno: dado → elegir ficha → mover → capturas → siguiente |
+| `Piece.gd`, `PlayerPieceGroup.gd`, `PiecesManager.gd` | Fichas y grupos por color |
+| `WayPoint.gd`, `WayPointManager.gd` | Casillas y caminos de cada color |
+| `Dice.gd` | Dado animado (no conoce las reglas) |
+| `HUD.gd` | Interfaz de la partida, pausa y pantalla final |
+| `GameFeedback.gd` | Sonidos, partículas y temblor de cámara (solo escucha señales) |
+| `ventana_trivial.gd`, `BasePreguntas.gd` (autoload) | Trivia y banco de preguntas |
+| `AudioManager.gd` (autoload) | Efectos y música |
+| `UITheme.gd`, `UIKit.gd`, `PanelAjustes.gd`, `PanelReglas.gd` | Estilo y componentes de interfaz |
 
-Feel free to use this project as you like. Happy coding!
+La lógica y la presentación están separadas: `BoardManager` emite señales
+(`turn_started`, `piece_captured`, `game_over`...) y la interfaz y los efectos
+reaccionan a ellas sin modificar el estado del juego.
+
+## Pruebas automáticas
+
+```bash
+godot --headless res://tests/test_rules.tscn      # 40 pruebas de reglas, IA y preguntas
+godot --headless res://tests/simulation.tscn      # 4 partidas completas simuladas
+godot --headless res://tests/check_scripts.tscn   # compila todos los scripts y escenas
+```
+
+## Exportar
+
+Al exportar, agrega `*.json` en *Exportar → Recursos → Filtros para exportar
+archivos que no son recursos*, para incluir `Data/preguntas.json`.
+
+## Créditos y licencias
+
+- Basado en el proyecto open source *Godot Ludo* de **rathod ketan** (licencia MIT, ver `LICENSE`).
+- Gráficos del tablero: *Ludo Graphic Design* de **Bharat kumawat** (CC BY 4.0, ver `ASSETS_LICENSE.md`).
+- Fuente **Nunito** (SIL Open Font License, ver `Arts/Fonts/Nunito-OFL.txt`).
+- Efectos de sonido y música generados para este proyecto.
+- Trivia, reglas ampliadas, IA, interfaz y demás mejoras: equipo del proyecto.
