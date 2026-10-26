@@ -1,105 +1,91 @@
 class_name Dice
 extends Node2D
+## Dado: anima la tirada y emite el resultado. No conoce las reglas del juego;
+## BoardManager decide cuándo se puede tirar (enabled) y qué pasa después.
+## Se tira con clic/toque sobre el dado o con la barra espaciadora.
 
 @export var Maindice: Sprite2D
-@export var DicesSpriteArray : Array[Texture2D]
-@export var IsTestRun:bool 
-@export var IsAutoDiceRoll:bool
+@export var DicesSpriteArray: Array[Texture2D]
+@export var IsTestRun: bool ## Si está activo, siempre sale 6 (para pruebas).
+@export var IsAutoDiceRoll: bool ## Obsoleto: los bots ahora los controla BoardManager.
 
 signal OnDiceRolled(value: int)
-signal OnDiceAniamtionComplate_Local
 signal OnDiceRollBegin
 
+## Si es true, el jugador humano puede tirar.
+var enabled: bool = false:
+	set(value):
+		enabled = value
+		_time = 0.0
+		queue_redraw()
+var rolling: bool = false
+var glow_color: Color = Color.WHITE
+var rng := RandomNumberGenerator.new()
+var forced_values: Array[int] = [] ## Permite forzar resultados en los tests.
+var _time: float = 0.0
+
+func _enter_tree() -> void:
+	add_to_group("Dado")
+
 func _ready() -> void:
-	GameManager.OnGameCurrentStateChange.connect(_on_game_current_state_change)
-	pass
-
-func _on_game_current_state_change(updatedState:GameManager.GameStateEnum)-> void:
-	match updatedState:
-		GameManager.GameStateEnum.PlayerCanRollDice:
-			var tablero = get_tree().get_first_node_in_group("Tablero")
-			var es_turno_bot = false
-			
-			if tablero != null and GameManager.modo_contra_bots and tablero.currentPlayerColor != GameManager.PlayerColor.Green:
-				es_turno_bot = true
-
-			# IGNORAMOS EL IsAutoDiceRoll DEL EDITOR. SOLO GIRA SI ES BOT.
-			if es_turno_bot:
-				await get_tree().create_timer(1.0).timeout
-				RollDice()
-			pass
-		pass
-	pass
+	rng.randomize()
 
 func SetSpriteByIndex(index: int) -> void:
-	Maindice.texture = DicesSpriteArray[index]
-	pass
-	
+	Maindice.texture = DicesSpriteArray[clampi(index, 0, DicesSpriteArray.size() - 1)]
+
 func RollDice() -> void:
-	if(GameManager.GameCurrentState == GameManager.GameStateEnum.PlayerCanRollDice):
-		
-		OnDiceRollBegin.emit()
-		GameManager.UpdateGameCurrentState(GameManager.GameStateEnum.Null)
+	if rolling:
+		return
+	rolling = true
+	enabled = false
+	Maindice.scale = Vector2.ONE
+	OnDiceRollBegin.emit()
+	AudioManager.play("dice_roll", 0.05)
+	await AnimateDice()
+	var value := rng.randi_range(1, 6)
+	if not forced_values.is_empty():
+		value = forced_values.pop_front()
+	elif IsTestRun:
+		value = 6
+	SetSpriteByIndex(value - 1)
+	AudioManager.play("dice_land")
+	var tw := create_tween()
+	tw.tween_property(Maindice, "scale", Vector2(1.3, 1.3), 0.08)
+	tw.tween_property(Maindice, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	rolling = false
+	OnDiceRolled.emit(value)
 
-		var randomNumber = RandomNumberGenerator.new().randf_range(0,6)
-		AnimateDice()
-		
-		await OnDiceAniamtionComplate_Local
-		
-		SetSpriteByIndex(int(randomNumber))
-		
-		var numero_final = int(randomNumber) + 1
-
-		if(IsTestRun):
-			numero_final = 6
-			pass
-			
-		print("EL DADO SACÓ EXACTAMENTE UN: ", numero_final)
-			
-		if numero_final == 6:
-			var ventana = get_tree().get_first_node_in_group("Trivia")
-			var tablero = get_tree().get_first_node_in_group("Tablero")
-			
-			var es_bot = (tablero != null and GameManager.modo_contra_bots and tablero.currentPlayerColor != GameManager.PlayerColor.Green)
-			
-			if ventana != null and not es_bot:
-				var categorias = ["futbol", "estructuras", "cultura"]
-				ventana.cargar_pregunta(categorias.pick_random())
-				ventana.show()
-				
-				var es_correcta = await ventana.respondido
-				
-				if not es_correcta:
-					print("¡Falló la trivia! Pierde el tiro y pasa el turno.")
-					if tablero != null:
-						tablero.UpdatePlayerTurn()
-					GameManager.UpdateGameCurrentState(GameManager.GameStateEnum.PlayerCanRollDice)
-					return 
-
-		GameManager.UpdateGameCurrentState(GameManager.GameStateEnum.PlayerSelectPiece)
-		OnDiceRolled.emit(numero_final)
-		pass
-	pass
-	
 func _input(event: InputEvent) -> void:
-	var diceClicked = event.is_action_pressed("DiceClick")
-	var isClickedOnSprite = Maindice.is_pixel_opaque(Maindice.get_local_mouse_position())
-	
-	var tablero = get_tree().get_first_node_in_group("Tablero")
-	var es_turno_bot = false
-	if tablero != null and GameManager.modo_contra_bots and tablero.currentPlayerColor != GameManager.PlayerColor.Green:
-		es_turno_bot = true
-		
-	if(diceClicked && isClickedOnSprite and not es_turno_bot):
+	if not enabled or rolling or not event.is_action_pressed("DiceClick"):
+		return
+	if event is InputEventKey or Maindice.is_pixel_opaque(Maindice.get_local_mouse_position()):
+		get_viewport().set_input_as_handled()
 		RollDice()
-		pass
-	pass
-	
+
 func AnimateDice() -> void:
-	for i in range(0,6):
-		await get_tree().create_timer(0.1).timeout
-		var index = RandomNumberGenerator.new().randf_range(0,6)
-		SetSpriteByIndex(int(index))
-		pass
-	OnDiceAniamtionComplate_Local.emit()
-	pass
+	var tw := create_tween().set_parallel()
+	tw.tween_property(Maindice, "rotation", TAU * 2, 0.55).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(Maindice, "position", Vector2(0, -60), 0.27).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_property(Maindice, "position", Vector2.ZERO, 0.25).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	for i in 8:
+		SetSpriteByIndex(rng.randi_range(0, 5))
+		await get_tree().create_timer(0.07, false).timeout
+	if tw.is_running():
+		await tw.finished
+	Maindice.rotation = 0.0
+
+func _process(delta: float) -> void:
+	if enabled:
+		_time += delta
+		queue_redraw()
+
+## Halo pulsante cuando es el turno de un humano.
+func _draw() -> void:
+	if not enabled:
+		return
+	var c := glow_color
+	var r := 140.0 + sin(_time * 5.0) * 10.0
+	c.a = 0.25
+	draw_circle(Vector2.ZERO, r, c)
+	c.a = 0.9
+	draw_arc(Vector2.ZERO, r, 0, TAU, 64, c, 8.0, true)

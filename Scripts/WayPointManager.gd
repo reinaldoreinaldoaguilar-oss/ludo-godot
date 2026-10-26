@@ -1,88 +1,30 @@
 class_name WayPointsManager
 extends Node2D
+## Da acceso a los caminos de cada color (57 casillas: 51 compartidas + 5 de pasillo + meta).
 
-@export var main_path:Node2D
+@export var main_path: Node2D
 @export var green_path: Array[WayPoint]
 @export var yellow_path: Array[WayPoint]
 @export var blue_path: Array[WayPoint]
 @export var red_path: Array[WayPoint]
 
-func GetPositionOfThisPoint(index: int,playerColor:GameManager.PlayerColor)->Vector2:
-	var positionLocal:Vector2 = Vector2.ZERO
-	match playerColor:
-		GameManager.PlayerColor.Green:
-			positionLocal = green_path[index].position
-			pass
-		GameManager.PlayerColor.Yellow:
-			positionLocal = yellow_path[index].position
-			pass
-		GameManager.PlayerColor.Blue:
-			positionLocal = blue_path[index].position
-			pass
-		GameManager.PlayerColor.Red:
-			positionLocal = red_path[index].position
-			pass
-		pass
-	return positionLocal
-	
-func GetCount(playerColor:GameManager.PlayerColor) -> int:
-	match playerColor:
-		GameManager.PlayerColor.Green:
-			return green_path.size()
-		GameManager.PlayerColor.Yellow:
-			return yellow_path.size()
-		GameManager.PlayerColor.Blue:
-			return blue_path.size()
-		GameManager.PlayerColor.Red:
-			return red_path.size()
-	return -1
+func get_path_for(color: GameManager.PlayerColor) -> Array[WayPoint]:
+	match color:
+		GameManager.PlayerColor.Green: return green_path
+		GameManager.PlayerColor.Yellow: return yellow_path
+		GameManager.PlayerColor.Blue: return blue_path
+		_: return red_path
 
-func SetPieceToThisWayPoint(index:int, piece)->void:
-	var wayPoint:WayPoint = null
-	
-	match piece.CurrentPlayerColor:
-		GameManager.PlayerColor.Green:
-			for item:WayPoint in main_path.get_children():
-				if(item == green_path[index]): 
-					wayPoint = item;
-					pass
-				pass
-			if index >=52:
-				wayPoint = green_path[index]
-				pass
-		GameManager.PlayerColor.Yellow:
-			for item:WayPoint in main_path.get_children():
-				if(item == yellow_path[index]): 
-					wayPoint = item;
-					pass
-				pass
-			if index >=52:
-				wayPoint = yellow_path[index]
-				pass
-		GameManager.PlayerColor.Blue:
-			for item:WayPoint in main_path.get_children():
-				if(item == blue_path[index]): 
-					wayPoint = item;
-					pass
-				pass
-			if index >=52:
-				wayPoint = blue_path[index]
-				pass
-		GameManager.PlayerColor.Red:
-			for item:WayPoint in main_path.get_children():
-				if(item == red_path[index]): 
-					wayPoint = item;
-					pass
-				pass
-			if index >=52:
-				wayPoint = red_path[index]
-				pass
-		pass
-		
-	if wayPoint == null:
-		push_error("waypoint should not be null!!!")
-		pass
-	print("set piece :",index," player :",piece.CurrentPlayerColor," Waypoint : ",wayPoint.name)
-	piece.CurrentWayPoint = wayPoint
-	wayPoint.SetPiece(piece)
-	pass
+func get_waypoint(index: int, color: GameManager.PlayerColor) -> WayPoint:
+	var path := get_path_for(color)
+	if index < 0 or index >= path.size():
+		push_error("Índice de casilla fuera de rango: %d" % index)
+		return null
+	return path[index]
+
+func GetPositionOfThisPoint(index: int, color: GameManager.PlayerColor) -> Vector2:
+	var wp := get_waypoint(index, color)
+	return wp.global_position if wp else Vector2.ZERO
+
+func GetCount(color: GameManager.PlayerColor) -> int:
+	return get_path_for(color).size()
